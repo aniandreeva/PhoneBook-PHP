@@ -1,3 +1,3 @@
-<?php require_once 'header.php' ?>
+<?php require_once '/shared/header.php' ?>
 
-<?php require_once 'footer.php' ?>
+<?php require_once '/shared/footer.php' ?>

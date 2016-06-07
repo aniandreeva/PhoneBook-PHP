@@ -68,10 +68,10 @@ class UsersRepository
 	}
 
 	function update($user){
-		$query = "UPDATE `users` SET username=?, password=? WHERE id=?";
+		$query = "UPDATE `users` SET username=?, password=?, is_admin=? WHERE id=?";
 
 		$stmt = $this->connection->prepare($query);
-		$stmt -> bind_param("ssi", $user->getUsername(), $user->getPassword(), $user->getId());
+		$stmt -> bind_param("ssii", $user->getUsername(), $user->getPassword(), $user->getIsAdmin(), $user->getId());
 
 		$stmt->execute();
 	}

@@ -706,7 +706,10 @@ form img {
     border: 2px solid #fff;
 }
 
-
+.error-message {
+    color: #E01010;
+    text-align: center;
+}
 
 
 

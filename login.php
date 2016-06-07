@@ -1,5 +1,5 @@
 <?php
-require_once 'header.php';
+require_once '/shared/header.php';
 require_once 'filters/userexistfilter.php';
 
 if ($_SERVER['REQUEST_METHOD']==='POST') :
@@ -11,12 +11,14 @@ if ($_SERVER['REQUEST_METHOD']==='POST') :
 	$password =  htmlspecialchars(trim($_POST["password"]));
 
 	if (empty($username) || empty($password)) {
+		$_SESSION["error"] = "All fields are required!";
 		header('Location: login.php');
 		exit();
 	}else{
 		$user = $usersRep->getByUserNameAndPassword($username, $password);
 
 		if (is_null($user)) {
+			$_SESSION["error"] = "Wrong username or password!";
 			header('Location: login.php');
 			exit();
 		}
@@ -31,8 +33,9 @@ else:
 ?>
 <div class="container-center" >
 	<div class="wrapper">
-<!--		<a href="#" id="login-close">X</a>-->
 	<h2>Login</h2>
+
+	<?php require_once '/shared/error_message.php' ?>
 
 	<form action="" method="POST" class="form">
 		<div class="input-group">
@@ -52,5 +55,5 @@ else:
 ?>
 
 <?php
-require_once 'footer.php';
+require_once '/shared/footer.php';
 ?>

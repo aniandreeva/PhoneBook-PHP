@@ -1,5 +1,5 @@
 <?php
-require_once 'header.php';
+require_once '/shared/header.php';
 require_once '/filters/loginfilter.php';
 
 require_once '/repositories/users_repository.php';
@@ -16,17 +16,22 @@ require_once '/repositories/users_repository.php';
         if (!empty($oldpassword) && !empty($newpassword) && !empty($repassword)) {
 
             if ($oldpassword !== $user->getPassword()) {
-                header('Location: personal_edit.php?err=wrongoldpass');
+                $_SESSION["error"] = "Old password do not match!";
+                header('Location: personal_edit.php');
                 exit();
             }
 
             if ($newpassword !== $repassword) {
-                header('Location: personal_edit.php?err=newandrepass');
+                $_SESSION["error"] = "New password and repeated password do not match!";
+                header('Location: personal_edit.php');
                 exit();
             }
 
             $user->setPassword($newpassword);
         }
+
+        $user->setUsername($username);
+        $_SESSION["LoggedUserUsername"] = $username;
 
         $usersRep->update($user);
 
@@ -36,6 +41,9 @@ require_once '/repositories/users_repository.php';
 <div class="container-center" >
     <div class="wrapper">
         <h2>My account</h2>
+
+        <?php require_once '/shared/error_message.php' ?>
+
         <form action="" method="POST" class="form">
             <div class="input-group">
             <label for="username">Username</label>
@@ -43,15 +51,15 @@ require_once '/repositories/users_repository.php';
             </div>
             <div class="input-group">
                 <label for="oldpassword">Old Password</label>
-                <input type="password" name="oldpassword" required placeholder="Old Password" id="oldpassword" /><br>
+                <input type="password" name="oldpassword" placeholder="Old Password" id="oldpassword" /><br>
             </div>
             <div class="input-group">
                 <label for="newpassword">New Password</label>
-                <input type="password" name="newpassword" required placeholder="New Password" id="newpassword" /><br>
+                <input type="password" name="newpassword" placeholder="New Password" id="newpassword" /><br>
             </div>
             <div class="input-group">
                 <label for="repassword">Repeat Password</label>
-                <input type="password" name="repassword" required placeholder="Password" id="repassword" /><br>
+                <input type="password" name="repassword" placeholder="Password" id="repassword" /><br>
             </div>
             <input type="submit" value="Save changes" />
         </form>
@@ -63,5 +71,5 @@ require_once '/repositories/users_repository.php';
 </div>
 <?php
     endif;
-require_once 'footer.php';
+require_once '/shared/footer.php';
 ?>

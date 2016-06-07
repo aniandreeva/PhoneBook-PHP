@@ -1,5 +1,5 @@
 <?php
-require_once 'header.php';
+require_once '/shared/header.php';
 require_once '/repositories/users_repository.php';
 require_once '/filters/authfilter.php';
 
@@ -12,9 +12,18 @@ require_once '/filters/authfilter.php';
     }
 
     if ($_SERVER['REQUEST_METHOD']==='POST'):
+        $username = htmlspecialchars(trim($_POST['username']));
         $password = htmlspecialchars(trim($_POST['password']));
-        $user->setUsername(htmlspecialchars(trim($_POST['username'])));
-        $user->setIsAdmin(intval($_POST['is_admin']));
+        $isAdmin = intval($_POST['is_admin']);
+
+        if (empty($username)) {
+            $_SESSION["error"] = "Username is required!";
+            header('Location: edit_user.php?id=' . $user->getId());
+            exit();
+        }
+
+        $user->setUsername($username);
+        $user->setIsAdmin($isAdmin);
 
         if (!empty($password)) {
             $user->setPassword($password);
@@ -29,6 +38,9 @@ require_once '/filters/authfilter.php';
  <div class="container-center" >
      <div class="wrapper">
          <h2>Edit User</h2>
+
+         <?php require_once '/shared/error_message.php' ?>
+
         <form action="" method="POST" class="form">
             <div class="input-group">
                 <label for="username">Username</label>
@@ -36,13 +48,13 @@ require_once '/filters/authfilter.php';
             </div>
             <div class="input-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" required placeholder="Password" id="password" /><br>
+                <input type="password" name="password" placeholder="Password" id="password" /><br>
             </div>
             <div class="input-group clear-center">
-                <input type="radio" name="is_admin" id="admin" value="admin" <?= $user->getIsAdmin() == '1' ? "checked" : ""; ?> /><label for="admin">Admin</label><br>
+                <input type="radio" name="is_admin" id="admin" value="1" <?= $user->getIsAdmin() == '1' ? "checked" : ""; ?> /><label for="admin">Admin</label><br>
             </div>
             <div class="input-group clear-center">
-                <input type="radio" name="is_admin" id="user" value="user" <?= $user->getIsAdmin() == '0' ? "checked" : ""; ?> /><label for="user">User</label><br>
+                <input type="radio" name="is_admin" id="user" value="0" <?= $user->getIsAdmin() == '0' ? "checked" : ""; ?> /><label for="user">User</label><br>
             </div>
 
             <input type="submit" value="Save changes" />
@@ -53,5 +65,5 @@ require_once '/filters/authfilter.php';
 
 <?php
     endif;
-require_once 'footer.php';
+require_once '/shared/footer.php';
 ?>

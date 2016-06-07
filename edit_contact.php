@@ -1,5 +1,5 @@
 <?php
-require_once 'header.php';
+require_once '/shared/header.php';
 require_once '/repositories/contacts_repository.php';
 require_once '/repositories/contactsGroups_repository.php';
 require_once '/repositories/groups_repository.php';
@@ -13,44 +13,68 @@ require_once '/filters/loginfilter.php';
         header('Location: add_contact.php');
         exit();
     }
-if ($contact->getUser_Id()!=$_SESSION["LoggedUserId"]){
-    header('Location: contacts.php');
-}
+
+    if ($contact->getUser_Id()!=$_SESSION["LoggedUserId"]){
+        header('Location: contacts.php');
+    }
+
     if ($_SERVER['REQUEST_METHOD']==='POST'):
-        $contact->setId(htmlspecialchars(trim($_POST['id'])));
-        $contact->setFirst_name(htmlspecialchars(trim($_POST['first_name'])));
-        $contact->setLast_name(htmlspecialchars(trim($_POST['last_name'])));
-        $contact->setPhone_number(htmlspecialchars(trim($_POST['phone_number'])));
 
-        $target_dir = "uploads/";
-        $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+        $firstName = htmlspecialchars(trim($_POST['first_name']));
+        $lastName = htmlspecialchars(trim($_POST['last_name']));
+        $phoneNumber = htmlspecialchars(trim($_POST['phone_number']));
 
-        $uploadOk = true;
-        $imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
-
-        // Check if image file is a actual image or fake image
-        $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-        if($check == false) {
-            $uploadOk = false;
+        if (empty($firstName) || empty($lastName) || empty($phoneNumber)) {
+            $_SESSION["error"] = "All fields are required!";
+            header('Location: edit_contact.php?id=' . $contact->getId());
+            exit();
         }
 
-        // Check file size
-        if ($_FILES["fileToUpload"]["size"] > 50000000) {
-            $uploadOk = false;
-        }
+        $contact->setFirst_name($firstName);
+        $contact->setLast_name($lastName);
+        $contact->setPhone_number($phoneNumber);
 
-        // Allow certain file formats
-        if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-            && $imageFileType != "gif" ) {
-            $uploadOk = false;
-        }
 
-        $filename = uniqid() . "." . $imageFileType;
-        $target_file = "uploads/" . $filename;
+        if(basename($_FILES["fileToUpload"]["name"]) != "") {
 
-        if ($uploadOk) {
-            if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-                $contact->setImagePath($filename);
+            $target_dir = "uploads/";
+            $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+
+            $uploadOk = true;
+            $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
+            $imageFileType = strtolower($imageFileType);
+
+            // Check if image file is a actual image or fake image
+            $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+            if ($check == false) {
+                $_SESSION["error"] = "Please, upload image file!";
+                $uploadOk = false;
+            }
+
+            // Check file size
+            if ($_FILES["fileToUpload"]["size"] > 500000) {
+                $_SESSION["error"] = "Image size is too big!";
+                $uploadOk = false;
+            }
+
+            // Allow certain file formats
+            if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+                && $imageFileType != "gif"
+            ) {
+                $_SESSION["error"] = "Please, upload .jgp, .png, .jpeg or .gif file!";
+                $uploadOk = false;
+            }
+
+            $filename = uniqid() . "." . $imageFileType;
+            $target_file = "uploads/" . $filename;
+
+            if ($uploadOk) {
+                if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+                    $contact->setImagePath($filename);
+                }
+            } else {
+                header('Location: edit_contact.php?id=' . $contact->getId());
+                exit();
             }
         }
 
@@ -74,9 +98,10 @@ if ($contact->getUser_Id()!=$_SESSION["LoggedUserId"]){
 <div class="container-center" >
     <div class="wrapper">
     <h2>Edit Contact</h2>
-        <form action="" method="POST" class="form" enctype="multipart/form-data">
-            <input type="hidden" name="id" value="<?= $contact->getId() ?>">
 
+        <?php require_once '/shared/error_message.php' ?>
+
+        <form action="" method="POST" class="form" enctype="multipart/form-data">
             <div class="input-group">
                 <img src="uploads/<?= $contact->getImagePath() ?>">
             </div>
@@ -123,5 +148,5 @@ if ($contact->getUser_Id()!=$_SESSION["LoggedUserId"]){
 </div>
 <?php
     endif;
-require_once 'footer.php';
+require_once '/shared/footer.php';
 ?>

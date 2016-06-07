@@ -18,7 +18,7 @@ class ContactsGroupsRepository
     }
 
     function getGroupsByContactId($contactId){
-        $result= $this->connection->query("SELECT * FROM groups WHERE id IN (SELECT DISTINCT groupId FROM `contacts_groups` cg WHERE cg.contactId=" . $contactId . ")");
+        $result= $this->connection->query("SELECT * FROM groups WHERE userId=" . $_SESSION["LoggedUserId"] . " AND id IN (SELECT DISTINCT groupId FROM `contacts_groups` cg WHERE cg.contactId=" . $contactId . ")");
 
         $groups = array();
         while ($row= $result->fetch_assoc()){
@@ -52,7 +52,7 @@ class ContactsGroupsRepository
     }
 
     function getNotGroupsByContactId($contactId){
-        $result= $this->connection->query("SELECT * FROM groups WHERE id NOT IN (SELECT DISTINCT groupId FROM `contacts_groups` cg WHERE cg.contactId=" . $contactId . ")");
+        $result= $this->connection->query("SELECT * FROM groups WHERE userId=" . $_SESSION["LoggedUserId"] . " AND id NOT IN (SELECT DISTINCT groupId FROM `contacts_groups` cg WHERE cg.contactId=" . $contactId . ")");
 
         $groups = array();
         while ($row= $result->fetch_assoc()){

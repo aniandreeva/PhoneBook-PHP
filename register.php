@@ -1,13 +1,6 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-	<title>PhoneBook</title>
-</head>
-<body>
 <?php
-require_once 'header.php';
-//require_once 'filters/authfilter.php';
-require_once  'filters/userexistfilter.php';
+require_once '/shared/header.php';
+require_once  '/filters/userexistfilter.php';
 
 if ($_SERVER['REQUEST_METHOD']==='POST') :
 	require_once '/repositories/users_repository.php';
@@ -19,14 +12,14 @@ if ($_SERVER['REQUEST_METHOD']==='POST') :
 	$repassword = htmlspecialchars(trim($_POST["repassword"]));
 
 	if ($password!==$repassword) {
+		$_SESSION["error"] = "Passwords do not match!";
 		header('Location: register.php');
-		echo "Passwords do not match";
 		exit();
 	}
 
 	if (empty($username) || empty($password) || empty($repassword)) {
+		$_SESSION["error"] = "All fields are required!";
 		header('Location: register.php');
-		echo "All fields are require";
 		exit();
 	}
 
@@ -42,8 +35,10 @@ else:
 	?>
 	<div class="container-center">
 		<div class="wrapper">
-<!--			<a href="#" id="login-close">X</a>-->
 		<h2>Register</h2>
+
+		<?php require_once '/shared/error_message.php' ?>
+
 		<form action="" method="POST" class="form">
 			<div class="input-group">
 				<label for="username">Username:</label>
@@ -63,7 +58,7 @@ else:
 	</div>
 <?php
 	endif;
-require_once 'footer.php';
+require_once '/shared/footer.php';
 ?>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-require_once 'header.php';
+require_once '/shared/header.php';
 require_once '/filters/loginfilter.php';
 
 if ($_SERVER['REQUEST_METHOD']==='POST'):
@@ -7,42 +7,64 @@ if ($_SERVER['REQUEST_METHOD']==='POST'):
     require_once '/repositories/contactsGroups_repository.php';
 
     $contactsRep = new ContactsRepository();
+
+    $firstName = htmlspecialchars(trim($_POST['first_name']));
+    $lastName = htmlspecialchars(trim($_POST['last_name']));
+    $phoneNumber = htmlspecialchars(trim($_POST['phone_number']));
+
+    if (empty($firstName) || empty($lastName) || empty($phoneNumber)) {
+        $_SESSION["error"] = "All fields are required!";
+        header('Location: add_contact.php');
+        exit();
+    }
+
     $contact= new Contact();
     
     $contact->setUser_Id($_SESSION["LoggedUserId"]);
-    $contact->setFirst_name(htmlspecialchars(trim($_POST['first_name'])));
-    $contact->setLast_name(htmlspecialchars(trim($_POST['last_name'])));
-    $contact->setPhone_number(htmlspecialchars(trim($_POST['phone_number'])));
+    $contact->setFirst_name($firstName);
+    $contact->setLast_name($lastName);
+    $contact->setPhone_number($phoneNumber);
 
-    $target_dir = "uploads/";
-    $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+    if(basename($_FILES["fileToUpload"]["name"]) != "") {
 
-    $uploadOk = true;
-    $imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+        $target_dir = "uploads/";
+        $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 
-    // Check if image file is a actual image or fake image
-    $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-    if($check == false) {
-        $uploadOk = false;
-    }
+        $uploadOk = true;
+        $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
+        $imageFileType = strtolower($imageFileType);
 
-    // Check file size
-    if ($_FILES["fileToUpload"]["size"] > 50000000) {
-        $uploadOk = false;
-    }
+        // Check if image file is a actual image or fake image
+        $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+        if ($check == false) {
+            $_SESSION["error"] = "Please, upload image file!";
+            $uploadOk = false;
+        }
 
-    // Allow certain file formats
-    if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-        && $imageFileType != "gif" ) {
-        $uploadOk = false;
-    }
+        // Check file size
+        if ($_FILES["fileToUpload"]["size"] > 500000) {
+            $_SESSION["error"] = "Image size is too big!";
+            $uploadOk = false;
+        }
 
-    $filename = uniqid() . "." . $imageFileType;
-    $target_file = "uploads/" . $filename;
+        // Allow certain file formats
+        if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+            && $imageFileType != "gif"
+        ) {
+            $_SESSION["error"] = "Please, upload .jgp, .png, .jpeg or .gif file!";
+            $uploadOk = false;
+        }
 
-    if ($uploadOk) {
-        if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-            $contact->setImagePath($filename);
+        $filename = uniqid() . "." . $imageFileType;
+        $target_file = "uploads/" . $filename;
+
+        if ($uploadOk) {
+            if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+                $contact->setImagePath($filename);
+            }
+        } else {
+            header('Location: add_contact.php');
+            exit();
         }
     }
     else {
@@ -65,11 +87,14 @@ else:
     require_once '/repositories/groups_repository.php';
     $groupsRep= new GroupsRepository();
 
-    $groups = $groupsRep->getAll();
+    $groups = $groupsRep->getAllByUserId($_SESSION["LoggedUserId"]);
 ?>
 <div class="container-center" >
     <div class="wrapper">
     <h2>Add Contact</h2>
+
+        <?php require_once '/shared/error_message.php' ?>
+
         <form action="" method="POST" class="form" enctype="multipart/form-data">
             <div class="input-group">
                 <img src="uploads/default.jpg">
@@ -107,5 +132,5 @@ else:
 </div>
 <?php
     endif;
-require_once 'footer.php';
+require_once '/shared/footer.php';
 ?>
